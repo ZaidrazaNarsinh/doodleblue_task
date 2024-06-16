@@ -105,22 +105,22 @@ import 'network_result.dart';
 //   }
 // }
 
-APIResult<T> getAPIResultFromNetworkWithoutBase<T>(
+APIResultState<T> getAPIResultFromNetworkWithoutBase<T>(
     NetworkResult networkResult) {
   switch (networkResult.networkResultType) {
     case NetworkResultType.error:
-      return APIResult.failure("Error");
+      return const FailureState("Error");
     case NetworkResultType.noInternet:
-      return APIResult.noInternet();
+      return const NoInternetState();
     case NetworkResultType.unauthorised:
-      return APIResult.userUnauthorised();
+      return const UserUnauthorisedState();
     case NetworkResultType.notFound:
-      return APIResult.userDeleted();
+      return const UserDeletedState();
     case NetworkResultType.success:
     default:
       {
         if (networkResult.result.isNullOrEmpty()) {
-          return APIResult.failure("");
+          return const FailureState("");
         }
         try {
           if (networkResult.result != null) {
@@ -128,16 +128,16 @@ APIResult<T> getAPIResultFromNetworkWithoutBase<T>(
 
             T? responseModel = JsonConvert.fromJsonAsT<T>(baseJson);
 
-            return APIResult.success(
+            return SuccessState(
               "",
               responseModel,
             );
           } else {
-            return APIResult.success("", null);
+            return const SuccessState("", null);
           }
         } catch (e, s) {
           //FirebaseCrashlytics.instance.recordError(e, s);
-          return APIResult.failure(e.toString());
+          return FailureState(e.toString());
         }
       }
   }

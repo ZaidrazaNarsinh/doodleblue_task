@@ -1,6 +1,7 @@
 import 'package:doodleblue_task/util/dimensions.dart';
 import 'package:doodleblue_task/util/extension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shimmer/shimmer.dart';
@@ -45,6 +46,8 @@ class BusinessDetailScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        systemOverlayStyle:
+            const SystemUiOverlayStyle(statusBarColor: Colors.teal),
         backgroundColor: Colors.teal,
         elevation: 4.0,
       ),
@@ -64,7 +67,7 @@ class BusinessDetailScreen extends StatelessWidget {
                   ),
                 ),
                 Image.network(
-                  business.imageUrl ?? 'https://via.placeholder.com/400',
+                  business.imageUrl ?? '',
                   height: Dimensions.h250,
                   width: double.infinity,
                   fit: BoxFit.cover,

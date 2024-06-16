@@ -1,12 +1,31 @@
+import 'package:doodleblue_task/features/cubits/business_list_cubit.dart';
+import 'package:doodleblue_task/features/repositories/business_listing_repository.dart';
+import 'package:doodleblue_task/model/response/model_response_business_list_entity.dart';
 import 'package:doodleblue_task/util/dimensions.dart';
 import 'package:doodleblue_task/util/extension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import '../model/response/model_response_business_entity.dart';
+import '../network/api_result.dart';
 import 'business_detail_screen.dart';
 
-class BusinessListingScreen extends StatelessWidget {
+class BusinessListingScreen extends StatefulWidget {
   const BusinessListingScreen({super.key});
+
+  @override
+  State<BusinessListingScreen> createState() => _BusinessListingScreenState();
+}
+
+class _BusinessListingScreenState extends State<BusinessListingScreen> {
+  late BusinessListCubit businessListCubit =
+      BusinessListCubit(BusinessListingRepository());
+  @override
+  void initState() {
+    businessListCubit.callGetBusinessListAPI();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,20 +39,67 @@ class BusinessListingScreen extends StatelessWidget {
             color: Colors.white,
           ),
         ),
+        systemOverlayStyle:
+            const SystemUiOverlayStyle(statusBarColor: Colors.teal),
         centerTitle: true,
         backgroundColor: Colors.teal,
         elevation: 4.0,
       ),
-      body: Container(
-        color: Colors.grey[100],
-        child: ListView.builder(
-          itemCount: 10,
-          itemBuilder: (context, index) {
-            final business =
-                ModelResponseBusinessEntity.fromJson(BusinessModel);
-            return BusinessCard(business: business);
-          },
-        ),
+      body: BlocProvider.value(
+        value: businessListCubit,
+        child: BlocBuilder<BusinessListCubit,
+                APIResultState<ModelResponseBusinessListEntity>?>(
+            bloc: businessListCubit,
+            builder: (context, state) {
+              if (state != null) {
+                if (APIResult.isFailure(state)) {
+                  return SizedBox(
+                    height: double.infinity,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(state.message ?? "",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.red, fontSize: Dimensions.sp16)),
+                      ),
+                    ),
+                  );
+                } else if (APIResult.isSuccess(state)) {
+                  if (state.result != null) {
+                    final businessList = state.result!.businesses;
+                    return Container(
+                      color: Colors.grey[100],
+                      child: ListView.builder(
+                        itemCount: businessList?.length,
+                        itemBuilder: (context, index) {
+                          return BusinessCard(business: businessList![index]);
+                        },
+                      ),
+                    );
+                  } else {
+                    return SizedBox(
+                      height: double.infinity,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("No businesses found",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: Dimensions.sp16)),
+                        ),
+                      ),
+                    );
+                  }
+                }
+              }
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.teal,
+                ),
+              );
+            }),
       ),
     );
   }
@@ -178,40 +244,3 @@ class BusinessCard extends StatelessWidget {
     );
   }
 }
-
-final Map<String, dynamic> BusinessModel = {
-  "id": "16ZnHpuaaBt92XWeJHCC5A",
-  "alias": "olio-e-più-new-york-7",
-  "name": "Olio e Più",
-  "image_url":
-      "https://s3-media4.fl.yelpcdn.com/bphoto/CUpPgz_Q4QBHxxxxDJJTTA/o.jpg",
-  "is_closed": false,
-  "url":
-      "https://www.yelp.com/biz/olio-e-pi%C3%B9-new-york-7?adjust_creative=BlndLX7A8uetp91dgJCDcw&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=BlndLX7A8uetp91dgJCDcw",
-  "review_count": 5571,
-  "categories": [
-    {"alias": "pizza", "title": "Pizza"},
-    {"alias": "italian", "title": "Italian"},
-    {"alias": "cocktailbars", "title": "Cocktail Bars"}
-  ],
-  "rating": 4.5,
-  "coordinates": {
-    "latitude": 40.73406231935954,
-    "longitude": -73.99999980859876
-  },
-  "transactions": ["delivery", "pickup"],
-  "price": "599",
-  "location": {
-    "address1": "3 Greenwich Ave",
-    "address2": null,
-    "address3": "",
-    "city": "New York",
-    "zip_code": "10014",
-    "country": "US",
-    "state": "NY",
-    "display_address": ["3 Greenwich Ave", "New York, NY 10014"]
-  },
-  "phone": "+12122436546",
-  "display_phone": "(212) 243-6546",
-  "distance": 3207.585573981827
-};

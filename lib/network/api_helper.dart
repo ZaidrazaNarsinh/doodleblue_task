@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:doodleblue_task/env/env.dart';
 import 'package:doodleblue_task/util/extension.dart';
 import 'package:doodleblue_task/util/logger_util.dart';
 import 'package:flutter/foundation.dart';
@@ -25,7 +26,8 @@ class APIHelper {
 
   static APIHelper get instance => _instance;
 
-  Future<NetworkResult> callPostApi(String path, dynamic params, bool showLoader,
+  Future<NetworkResult> callPostApi(
+      String path, dynamic params, bool showLoader,
       {bool? useDefaultBaseURL}) async {
     var callingURL = useDefaultBaseURL == false
         ? path
@@ -35,7 +37,7 @@ class APIHelper {
 
     if (_isDebug) {
       timber("API URL -> $callingURL");
-      timber("API Headers -> $_headers", usePrint: true);
+      timber("API Headers -> $_headers",);
       timber("API Parameters -> $parameter");
     }
 
@@ -49,9 +51,7 @@ class APIHelper {
             .timeout(const Duration(minutes: 1));
         EasyLoading.dismiss();
         if (resp.statusCode == 200 || resp.statusCode == 201) {
-          
-            return Future.value(NetworkResult.success(resp.body));
-          
+          return Future.value(NetworkResult.success(resp.body));
         } else if (resp.statusCode == 401 || resp.statusCode == 403) {
           return Future.value(NetworkResult.unAuthorised());
         } else {
@@ -380,13 +380,13 @@ class APIHelper {
 
   Future<void> _createHeaders() async {
     // String authToken = SharedPrefUtils.getToken();
-    String authToken = '';
+    String authToken = Env.authToken;
     logger.d("Api header auth token ===> $authToken");
 
     if (authToken.isNotEmpty) {
       _headers = {
         "Content-Type": "application/json",
-        "Accept": "application/json",
+        "Accept": "*/*",
         "platform": Platform.isIOS ? "ios" : "android",
         NetworkConstant.authorization: NetworkConstant.bearer + authToken,
       };
