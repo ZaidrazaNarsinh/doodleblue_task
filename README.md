@@ -14,4 +14,6 @@ Usage
 2. Tap on a business to view its details, including address, contact information, and reviews.
 
 ![ss1](https://github.com/ZaidrazaNarsinh/doodleblue_task/assets/70736052/5729e505-0197-4a49-a24c-a71dbd3d4195)
+
+
 ![ss2](https://github.com/ZaidrazaNarsinh/doodleblue_task/assets/70736052/9d04ec88-91f8-4f8a-81c1-d62f74a1d31b)
